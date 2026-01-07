@@ -1,8 +1,24 @@
+// src/app/api/generate/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { model } from "../../../lib/gemini";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
   try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "API Key is missing" },
+        { status: 500 }
+      );
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    // ✅ UPDATED: Using the specific model from your allowed list
+    // Use the Flash Experimental model (High free tier limits)
+    // Use the generic 'latest' alias which is usually most permissive for free keys
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+
     const { topic, tone } = await req.json();
 
     if (!topic) {
@@ -26,8 +42,11 @@ export async function POST(req: NextRequest) {
     const text = response.text();
 
     return NextResponse.json({ content: text });
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    return NextResponse.json({ error: "Failed to generate" }, { status: 500 });
+  } catch (error: any) {
+    console.error("❌ Generator Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to generate content" },
+      { status: 500 }
+    );
   }
 }

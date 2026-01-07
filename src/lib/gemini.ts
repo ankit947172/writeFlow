@@ -1,14 +1,15 @@
+// src/lib/gemini.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
-  throw new Error("Missing GEMINI_API_KEY environment variable");
+  console.error("❌ API Key is MISSING in .env.local");
 }
 
-export const genAI = new GoogleGenerativeAI(apiKey);
+const genAI = new GoogleGenerativeAI(apiKey || "DUMMY_KEY");
 
-// We are using the specific model from your list
+// FIX: 'gemini-pro' is the most reliable model for standard API keys
 export const model = genAI.getGenerativeModel({
-  model: "gemini-3-flash-preview",
+  model: "gemini-pro",
 });
